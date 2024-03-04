@@ -19,16 +19,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set Up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3.12.0
         with:
-          distribution: 'temurin'
-          java-version: '21'
-
+          distribution: 'oracle'
+          java-version: '17'
+          cache: 'gradle'
       - name: Set Up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.9'
           channel: 'stable'
+          cache: true
 
       - name: Install Dependencies
         run: flutter pub get
@@ -42,13 +43,13 @@ jobs:
       - name: Build appBundle
         run: flutter build appbundle
 
-      - name: Build IPA
-        run: flutter build ipa --no-codesign
-
-      - name: Compress Archives and IPAs
-        run: |
-          cd build 
-          tar -czf ios_build.tar.gz ios
+#      - name: Build IPA
+#        run: flutter build ios --release
+#
+#      - name: Compress Archives and IPAs
+#        run: |
+#          cd build
+#          tar -czf ios_build.tar.gz ios
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
@@ -57,11 +58,10 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/app-release.apk
             build/app/outputs/bundle/release/app-release.aab
-            build/ios_build.tar.gz
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/flutter-apk/app-release.apk,build/app/outputs/bundle/release/app-release.aab,build/ios_build.tar.gz"
-          tag: v1.0.${{ github.run_number }}
+          artifacts: "build/app/outputs/flutter-apk/app-release.apk,build/app/outputs/bundle/release/app-release.aab"
+          tag: v1.0.0
           token: ${{ secrets.TOKEN }}
